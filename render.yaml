@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: mon-serveur-rust
+    name: winwin_ai
     env: rust
     plan: free
     buildCommand: "cargo build --release"
