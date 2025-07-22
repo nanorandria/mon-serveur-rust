@@ -1,8 +1,0 @@
-services:
-  - type: web
-    name: mon-serveur-rust
-    env: rust
-    plan: free
-    buildCommand: "cargo build --release"
-    startCommand: "./target/release/mon_serveur_rust"
-    autoDeploy: true
