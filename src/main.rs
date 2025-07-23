@@ -1,6 +1,6 @@
 #[macro_use] extern crate rocket;
 
-use rocket::fs::{FileServer, relative};
+use rocket::fs::{NamedFile, FileServer, relative};
 use rocket::http::ContentType;
 use rocket::data::Data;
 use rocket::serde::json::Json;
@@ -49,5 +49,5 @@ fn rocket() -> _ {
     rocket::build()
         .manage(Arc::new(AppState { host }))
         .mount("/", routes![upload, temp_file])
-        .mount("/static", FileServer::from(relative!("static"))) // nouvelle ligne
+        .mount("/static", FileServer::from(relative!("static")))
 }
