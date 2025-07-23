@@ -1,8 +1,10 @@
 services:
   - type: web
-    name: winwin_ai
-    env: rust
+    name: rust-upload-server
+    env: cargo
     plan: free
     buildCommand: "cargo build --release"
-    startCommand: "./target/release/winwin_ai"
-    autoDeploy: true
+    startCommand: "cargo run --release"
+    envVars:
+      - key: HOST_URL
+        value: https://mon-serveur-rust.onrender.com

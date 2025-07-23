@@ -1,13 +1,52 @@
-use actix_web::{web, App, HttpServer, Responder};
+#[macro_use] extern crate rocket;
 
-async fn hello() -> impl Responder {
-    "Hello depuis Render !"
+use rocket::fs::NamedFile;
+use rocket::http::ContentType;
+use rocket::data::Data;
+use rocket::serde::json::Json;
+use rocket::State;
+use std::path::PathBuf;
+use uuid::Uuid;
+use std::sync::Arc;
+
+struct AppState {
+    host: String,
 }
 
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| App::new().route("/", web::get().to(hello)))
-        .bind(("0.0.0.0", std::env::var("PORT").unwrap().parse().unwrap()))?
-        .run()
-        .await
+#[derive(serde::Serialize)]
+struct UploadResponse {
+    url: String,
+}
+
+#[post("/upload", data = "<data>")]
+async fn upload(
+    content_type: &ContentType,
+    data: Data<'_>,
+    state: &State<Arc<AppState>>
+) -> Json<UploadResponse> {
+    let id = Uuid::new_v4().to_string();
+    let filename = format!("/tmp/{}.jpg", id);
+
+    if let Ok(mut file) = tokio::fs::File::create(&filename).await {
+        let _ = data.open(10 * 1024 * 1024).stream_to(&mut file).await;
+    }
+
+    Json(UploadResponse {
+        url: format!("{}/temp/{}.jpg", state.host, id),
+    })
+}
+
+#[get("/temp/<filename>")]
+async fn temp_file(filename: String) -> Option<NamedFile> {
+    let path = format!("/tmp/{}", filename);
+    NamedFile::open(PathBuf::from(path)).await.ok()
+}
+
+#[launch]
+fn rocket() -> _ {
+    let host = std::env::var("HOST_URL").unwrap_or_else(|_| "http://localhost:8000".to_string());
+
+    rocket::build()
+        .manage(Arc::new(AppState { host }))
+        .mount("/", routes![upload, temp_file])
 }

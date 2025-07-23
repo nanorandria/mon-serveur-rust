@@ -1,7 +1,9 @@
 [package]
-name = "winwin_ai"
+name = "rust-upload-server"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 
 [dependencies]
-actix-web = "4"
+rocket = { version = "0.5.0-rc.3", features = ["json", "fs"] }
+tokio = { version = "1", features = ["full"] }
+uuid = { version = "1" }
