@@ -2,7 +2,7 @@
 
 use rocket::fs::{NamedFile, FileServer, relative};
 use rocket::http::ContentType;
-use rocket::data::Data;
+use rocket::data::{Data, ByteUnit};
 use rocket::serde::json::Json;
 use rocket::State;
 use std::path::PathBuf;
@@ -28,7 +28,7 @@ async fn upload(
     let filename = format!("/tmp/{}.jpg", id);
 
     if let Ok(mut file) = tokio::fs::File::create(&filename).await {
-        let _ = data.open(10 * 1024 * 1024).stream_to(&mut file).await;
+        let _ = data.open(ByteUnit::from_bytes(10 * 1024 * 1024)).stream_to(&mut file).await;
     }
 
     Json(UploadResponse {
